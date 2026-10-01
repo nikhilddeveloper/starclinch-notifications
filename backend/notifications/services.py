@@ -3,7 +3,7 @@ from django.db import transaction
 from django.utils import timezone
 from .models import Delivery, NotificationEvent, Profile, Trigger
 from .variables import render, names
-from .providers import send, ProviderError
+from .providers import send, ProviderError, is_dry_run
 
 def dispatch(delivery_id):
     # Conditional claim is atomic across web processes and the optional worker.
@@ -52,7 +52,7 @@ def fire_event(key, user, deduplication_key, test_template=None):
                 reason = reason or 'WhatsApp consent is off.'
         else:
             recipients = [str(value) for value in user.push_subscriptions.values_list('subscription_id', flat=True)] or ['']
-        snapshot = {'dry_run': settings.NOTIFICATIONS_DRY_RUN, 'title': render(template.title, template.variable_mappings, context),
+        snapshot = {'dry_run': is_dry_run(template.channel), 'title': render(template.title, template.variable_mappings, context),
                     'body': render(template.body, template.variable_mappings, context),
                     'provider_name': template.provider_name, 'provider_status': template.provider_status,
                     'language': template.language, 'revision': template.revision,

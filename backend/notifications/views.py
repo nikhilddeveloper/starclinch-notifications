@@ -171,7 +171,7 @@ def health(request):
 
 @api_view(['GET'])
 def configuration(request):
-    return Response({'dry_run': settings.NOTIFICATIONS_DRY_RUN, 'inline': settings.NOTIFICATIONS_INLINE,
+    return Response({'dry_run': settings.NOTIFICATIONS_DRY_RUN, 'whatsapp_dry_run': settings.WHATSAPP_DRY_RUN, 'inline': settings.NOTIFICATIONS_INLINE,
         'onesignal_app_id': settings.ONESIGNAL_APP_ID,
         'providers': {'whatsapp': bool(settings.WHATSAPP_ACCESS_TOKEN and settings.PHONE_NUMBER_ID and settings.WHATSAPP_BUSINESS_ACCOUNT_ID),
                       'email': bool(settings.POSTMARKAPP_TOKEN and settings.POSTMARK_FROM_EMAIL),

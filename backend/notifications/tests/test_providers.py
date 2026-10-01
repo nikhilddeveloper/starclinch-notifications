@@ -6,7 +6,7 @@ from django.test import SimpleTestCase, override_settings
 from notifications.providers import api, send, sync_whatsapp, ProviderError
 from notifications.variables import whatsapp_body
 
-@override_settings(NOTIFICATIONS_DRY_RUN=False, WHATSAPP_ACCESS_TOKEN='test-token', PHONE_NUMBER_ID='test-phone-id',
+@override_settings(WHATSAPP_DRY_RUN=False, NOTIFICATIONS_DRY_RUN=False, WHATSAPP_ACCESS_TOKEN='test-token', PHONE_NUMBER_ID='test-phone-id',
     WHATSAPP_BUSINESS_ACCOUNT_ID='test-business', POSTMARKAPP_TOKEN='postmark-test', POSTMARK_FROM_EMAIL='sender@example.com',
     ONESIGNAL_APP_ID='test-app', ONESIGNAL_REST_API_KEY='test-key', SANDBOX_EMAILS=['test@example.com'], SANDBOX_PHONES=['+919876543210'])
 class ProviderTests(SimpleTestCase):
@@ -83,3 +83,13 @@ class ProviderTests(SimpleTestCase):
         template = SimpleNamespace(provider_name='login_v1', language='en_US')
         self.assertEqual(sync_whatsapp(template)[1], 'APPROVED')
         self.assertEqual(api_mock.call_args.args[0], 'GET')
+
+    @override_settings(WHATSAPP_DRY_RUN=True)
+    @patch('notifications.providers.api')
+    def test_whatsapp_only_dry_run_leaves_email_live(self, api_mock):
+        api_mock.return_value = {'MessageID': 'mail-1'}
+        self.assertEqual(send(self.delivery('whatsapp', '+919876543210'))[0], 'simulated')
+        self.assertEqual(sync_whatsapp(SimpleNamespace())[1], 'DRAFT')
+        api_mock.assert_not_called()
+        self.assertEqual(send(self.delivery('email', 'test@example.com'))[0], 'accepted')
+        self.assertEqual(api_mock.call_count, 1)

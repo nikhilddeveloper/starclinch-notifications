@@ -36,8 +36,11 @@ def wa_url(identifier, suffix):
 def wa_headers():
     return {'Authorization': f'Bearer {settings.WHATSAPP_ACCESS_TOKEN}'}
 
+def is_dry_run(channel):
+    return settings.NOTIFICATIONS_DRY_RUN or (channel == 'whatsapp' and settings.WHATSAPP_DRY_RUN)
+
 def sync_whatsapp(template):
-    if settings.NOTIFICATIONS_DRY_RUN:
+    if is_dry_run('whatsapp'):
         return '', 'DRAFT', 'Dry run: approval requires a real Meta sandbox account.'
     require('WHATSAPP_ACCESS_TOKEN', 'WHATSAPP_BUSINESS_ACCOUNT_ID')
     provider_name = template.provider_name
@@ -59,7 +62,7 @@ def sync_whatsapp(template):
 
 def send(delivery):
     payload = delivery.snapshot
-    if settings.NOTIFICATIONS_DRY_RUN or payload.get('dry_run', False):
+    if is_dry_run(delivery.channel) or payload.get('dry_run', False):
         return 'simulated', '', 'Dry run only; no provider request or real notification.'
     if delivery.channel == 'email':
         require('POSTMARKAPP_TOKEN', 'POSTMARK_FROM_EMAIL')

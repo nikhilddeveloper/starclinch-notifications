@@ -187,7 +187,7 @@ class NotificationTests(TestCase):
         self.assertEqual(response.status_code, 400)
     def test_configuration_does_not_expose_keys(self):
         response = self.client.get('/api/config/')
-        self.assertEqual(set(response.data), {'dry_run', 'inline', 'onesignal_app_id', 'providers'})
+        self.assertEqual(set(response.data), {'dry_run', 'whatsapp_dry_run', 'inline', 'onesignal_app_id', 'providers'})
 
     @override_settings(NOTIFICATIONS_INLINE=False)
     def test_queued_dry_run_remains_simulated_after_mode_change(self):
@@ -209,3 +209,15 @@ class NotificationTests(TestCase):
         NotificationTemplate.objects.filter(pk=self.email.pk).update(body='No variables here', variable_mappings={})
         with self.assertRaises(ValidationError):
             serializer.save()
+
+    @override_settings(NOTIFICATIONS_DRY_RUN=False, WHATSAPP_DRY_RUN=True, NOTIFICATIONS_INLINE=False)
+    def test_queued_whatsapp_simulation_survives_mode_change(self):
+        event = self.fire()
+        delivery = event.deliveries.get(channel='whatsapp')
+        self.assertTrue(delivery.snapshot['dry_run'])
+        with self.settings(WHATSAPP_DRY_RUN=False):
+            with patch('notifications.providers.requests.request') as http:
+                dispatch(delivery.pk)
+                http.assert_not_called()
+        delivery.refresh_from_db()
+        self.assertEqual(delivery.status, 'simulated')

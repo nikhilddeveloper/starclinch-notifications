@@ -155,3 +155,6 @@ Submit the GitHub repository, Render backend URL, Vercel frontend URL, admin acc
 - [Vite on Vercel](https://vercel.com/docs/frameworks/frontend/vite)
 
 Queued dry-run messages retain their simulation flag even if the server switches to real delivery before the queue drains. Template edits are revalidated under a database row lock to prevent inconsistent mappings from overlapping edits.
+
+### Mixed test mode
+Set `NOTIFICATIONS_DRY_RUN=false` and `WHATSAPP_DRY_RUN=true` to simulate WhatsApp while Email and Web Push use their configured sandbox/free providers. WhatsApp sync stays in DRAFT and makes no Meta request. Queued simulated deliveries remain simulated after settings change. This mode does not fulfill the assessment requirement to receive actual WhatsApp notifications.

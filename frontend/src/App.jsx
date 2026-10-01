@@ -712,6 +712,9 @@ export default function App() {
               email, or a browser.
             </p>
           )}
+          {!config?.dry_run && config?.whatsapp_dry_run && (
+            <p className="mode-note">WhatsApp is simulated. Email and Web Push use real sandbox delivery.</p>
+          )}
           {tab === "templates" && (
             <>
               <div className="page-heading">
