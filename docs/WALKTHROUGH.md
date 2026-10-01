@@ -47,3 +47,24 @@ Best regards,
 Nikhil
 
 Replace every placeholder and verify every claim before sending. This repository does not send the email.
+
+## Current requested demo: real Email/Web Push, simulated WhatsApp
+
+This is a partial assessment demo: WhatsApp remains simulated at the user's request. Do not claim actual WhatsApp receipt or mark the original three-channel requirement complete.
+
+Production settings: `NOTIFICATIONS_DRY_RUN=false`, `WHATSAPP_DRY_RUN=true`. A local `.env` does not automatically configure Render. Secrets belong only in private local files and Render, never in the video or GitHub.
+
+Postmark account approval can restrict recipients to the verified sender domain (error 412). A valid API token and verified sender do not bypass that restriction. Use an authorized test inbox on that domain while waiting, or wait for approval to test Gmail.
+
+### Hinglish recording script, 5-7 minutes
+
+1. Intro: "Maine Django REST API aur React se notification management system banaya hai. Backend Render aur frontend Vercel par hai. PostgreSQL mein templates aur delivery records store hote hain."
+2. Sign in using the deployed admin account. Hide the password. Show the Login/Logout matrix. Say: "Trigger batata hai message kab bhejna hai; channel batata hai kahan bhejna hai."
+3. Show My profile: saved authorized email, international-format phone, consent checkboxes, registered browser. Do not remove the working subscription.
+4. Edit Login Email title to "Login demo" and body to "Hello {{name}}, your login demo is complete." Keep name mapped to user.name; save and show preview. Use Email Test send and show the actual inbox message. Show Web Push Test send and the actual browser notification. Show WhatsApp Test send as simulated, explicitly explaining that no Meta request is sent.
+5. Fire the real Logout action. Show delivery evidence, then log in again and show Login delivery evidence. These authentication actions are the actual triggers; Test send only tests an individual template.
+6. Toggle Login Email off, log out/in, and show the Login email delivery as skipped because the channel is disabled. The Logout email can still arrive because its toggle is separate. Restore Login Email to enabled.
+7. Explain Delivery activity: simulated means no send, accepted means provider accepted (inbox/browser receipt is separate proof), skipped has a reason, failed needs configuration/provider investigation.
+8. Show GitHub, README and live URLs. State WhatsApp simulation and any unverified receipt honestly. Upload the narrated recording, check link access, and share it with the repository and both deployment URLs.
+
+System flow: React action -> authenticated Django endpoint -> persisted event -> enabled template and consent checks -> variable rendering -> one delivery per channel/recipient -> provider adapter or simulation -> persisted delivery status. Channel failure does not block successful authentication or other channels.

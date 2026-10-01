@@ -93,3 +93,12 @@ class ProviderTests(SimpleTestCase):
         api_mock.assert_not_called()
         self.assertEqual(send(self.delivery('email', 'test@example.com'))[0], 'accepted')
         self.assertEqual(api_mock.call_count, 1)
+
+    @patch('notifications.providers.requests.request')
+    def test_postmark_approval_error_is_actionable_without_private_response(self, request_mock):
+        request_mock.return_value = Mock(ok=False, status_code=422, json=lambda: {
+            'ErrorCode': 412, 'Message': 'private recipient and token'})
+        with self.assertRaises(ProviderError) as error:
+            api('POST', 'https://api.postmarkapp.com/email', {})
+        self.assertIn('approval pending (412)', str(error.exception))
+        self.assertNotIn('private recipient', str(error.exception))

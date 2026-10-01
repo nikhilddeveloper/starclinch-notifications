@@ -27,6 +27,8 @@ def api(method, url, headers, payload=None, params=None):
         raise ProviderError('Provider returned an unexpected response.')
     if not response.ok or data.get('errors') or data.get('error') or data.get('ErrorCode', 0):
         # Never persist provider response bodies: they may contain tokens or recipient data.
+        if url.startswith('https://api.postmarkapp.com/') and data.get('ErrorCode') == 412:
+            raise ProviderError('Postmark approval pending (412): use a recipient on the verified sender domain, or wait for approval before sending to other domains.')
         raise ProviderError(f'Provider rejected request (HTTP {response.status_code}). Check credentials, approval, sender and recipient in provider dashboard.')
     return data
 
